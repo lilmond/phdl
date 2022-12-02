@@ -4,28 +4,18 @@ import re
 
 def get_video_url(cookie, token, viewkey):
     cookies = {
-        'ss': cookie,
-        'platform': 'tv',
-        'quality': '99999',
+        "ss": cookie,
+        "platform": "tv",
+        "quality": '99999',
     }
 
-    params = {
-        'viewkey': viewkey,
-        'token': token,
-    }
-
-    response = requests.get('https://www.pornhub.com/video/tv_media', params=params, cookies=cookies).json()
-
-    if not response:
-        print("Error: Unable to get video URL. Try again!")
-        return
+    response = requests.get(f"https://www.pornhub.com/video/tv_media?viewkey={viewkey}&token={token}", cookies=cookies).json()
 
     if not "videoUrl" in response:
         print("Error: Unable to get videoUrl. Try again!")
         return
     
     return response["videoUrl"]
-
 
 def get_cookientoken():
     http = requests.get("https://www.pornhub.com/")
@@ -35,35 +25,39 @@ def get_cookientoken():
     return (http.cookies.get_dict()["ss"], tokens[0])
 
 def main():
-    video_link = input("Video URL: ").strip()
+    try:
+        video_link = input("Video URL: ").strip()
 
-    video_key = None
-    queries = parse.urlsplit(video_link).query.split("&")
-    for query in queries:
+        video_key = None
+        queries = parse.urlsplit(video_link).query.split("&")
+        for query in queries:
+            try:
+                query_key, query_value = query.split("=", 1)
+            except Exception:
+                continue
+            if query_key.lower() == "viewkey":
+                video_key = query_value
+        
+        if not video_key:
+            print("Error: Invalid video URL. Unable to get videokey.")
+            return
+
         try:
-            query_key, query_value = query.split("=", 1)
+            cookie, token = get_cookientoken()
         except Exception:
-            continue
-        if query_key.lower() == "viewkey":
-            video_key = query_value
-    
-    if not video_key:
-        print("Error: Invalid video URL. Unable to get videokey.")
-        return
+            print("Error: Unable to get cookie and token.")
+            return
+        
+        try:
+            video_url = get_video_url(cookie, token, video_key)
+        except Exception:
+            print("Error: Unable to get video source.")
+            return
 
-    try:
-        cookie, token = get_cookientoken()
-    except Exception:
-        print("Error: Unable to get cookie and token.")
-        return
-    
-    try:
-        video_url = get_video_url(cookie, token, video_key)
-    except Exception:
-        print("Error: Unable to get video source.")
-        return
+        print(f"Video Source: {video_url}")
 
-    print(f"Video Source: {video_url}")
+    except KeyboardInterrupt:
+        return
 
 if __name__ == "__main__":
     main()

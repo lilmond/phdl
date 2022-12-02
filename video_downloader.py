@@ -26,35 +26,36 @@ def get_cookientoken():
 
 def main():
     try:
-        video_link = input("Video URL: ").strip()
+        while True:
+            video_link = input("Video URL: ").strip()
 
-        video_key = None
-        queries = parse.urlsplit(video_link).query.split("&")
-        for query in queries:
-            try:
-                query_key, query_value = query.split("=", 1)
-            except Exception:
+            video_key = None
+            queries = parse.urlsplit(video_link).query.split("&")
+            for query in queries:
+                try:
+                    query_key, query_value = query.split("=", 1)
+                except Exception:
+                    continue
+                if query_key.lower() == "viewkey":
+                    video_key = query_value
+            
+            if not video_key:
+                print("Error: Invalid video URL. Unable to get videokey.\n")
                 continue
-            if query_key.lower() == "viewkey":
-                video_key = query_value
-        
-        if not video_key:
-            print("Error: Invalid video URL. Unable to get videokey.")
-            return
 
-        try:
-            cookie, token = get_cookientoken()
-        except Exception:
-            print("Error: Unable to get cookie and token.")
-            return
-        
-        try:
-            video_url = get_video_url(cookie, token, video_key)
-        except Exception:
-            print("Error: Unable to get video source.")
-            return
+            try:
+                cookie, token = get_cookientoken()
+            except Exception:
+                print("Error: Unable to get cookie and token.\n")
+                continue
+            
+            try:
+                video_url = get_video_url(cookie, token, video_key)
+            except Exception:
+                print("Error: Unable to get video source.\n")
+                continue
 
-        print(f"Video Source: {video_url}")
+            print(f"Video Source: {video_url}\n")
 
     except KeyboardInterrupt:
         return

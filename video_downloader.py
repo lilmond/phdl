@@ -2,11 +2,11 @@ from urllib import parse
 import requests
 import re
 
-def get_video_url(cookie, token, viewkey):
+def get_video_url(cookie, token, viewkey, quality):
     cookies = {
         "ss": cookie,
         "platform": "tv",
-        "quality": '99999',
+        "quality": str(quality),
     }
 
     response = requests.get(f"https://www.pornhub.com/video/tv_media?viewkey={viewkey}&token={token}", cookies=cookies).json()
@@ -28,6 +28,11 @@ def main():
     try:
         while True:
             video_link = input("Video URL: ").strip()
+            try:
+                quality = int(input("Quality: ").strip())
+            except ValueError:
+                print("Error: Invalid quality. Must be integer. Setting to max...")
+                quality = 99999
 
             video_key = None
             queries = parse.urlsplit(video_link).query.split("&")
@@ -50,7 +55,7 @@ def main():
                 continue
             
             try:
-                video_url = get_video_url(cookie, token, video_key)
+                video_url = get_video_url(cookie, token, video_key, quality)
             except Exception:
                 print("Error: Unable to get video source.\n")
                 continue

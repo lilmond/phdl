@@ -9,7 +9,7 @@ def get_video_url(cookie, token, viewkey, quality):
         "quality": str(quality),
     }
 
-    response = requests.get(f"https://www.pornhub.com/video/tv_media?viewkey={viewkey}&token={token}", cookies=cookies).json()
+    response = requests.get(f"https://www.pornhub.com/video/tv_media?viewkey={viewkey}&token={token}", cookies=cookies, headers={"User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36"}).json()
 
     if not "videoUrl" in response:
         print("Error: Unable to get videoUrl. Try again!")
@@ -51,7 +51,7 @@ def main():
             try:
                 cookie, token = get_cookientoken()
             except Exception:
-                print("Error: Unable to get cookie and token.\n")
+                print("Warning: Unable to get cookie and token.\n")
                 continue
             
             try:
